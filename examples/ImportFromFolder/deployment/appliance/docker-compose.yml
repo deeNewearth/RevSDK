@@ -1,0 +1,19 @@
+version: '2.3'
+
+services:
+
+  app: 
+    image: labizbille/importfromfolder:1.0.0.2
+    restart: on-failure
+    volumes:
+      - C:\tmp\sampleimages:/images
+    environment:
+      - "rev__revUrl=https://apprc.scanrev.com"
+      - "rev__workspace=labizbille"
+      - "rev__jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJnb29nbGUtb2F1dGgyfDEwMTQwODIxNTgzNjE1ODc1NzU0OCIsImp0aSI6ImI4M2Q1NjFjLTk4YzktNDFhYy04YmFmLWNkMWRhZWIwZmM5MiIsIlJldkFwcEFjY2VzcyI6IkFsbCIsIkV4dGVybmFsUHJvZ3JhbSI6IjEiLCJleHAiOjE1NzE5MjAyMTUsImlzcyI6InJldjIiLCJhdWQiOiJyZXYyIn0.EdXd8cORJnEDsrQbpQulYHmiYqfNukQOBdIkjqRe_u0"
+      - "folder=/images"
+      - "reponame=Test1"
+
+networks:
+  backend:
+

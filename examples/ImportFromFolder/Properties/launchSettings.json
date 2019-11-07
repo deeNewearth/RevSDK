@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ImportFromFolder": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "reponame": "Test1"
+      }
+    }
+  }
+}
