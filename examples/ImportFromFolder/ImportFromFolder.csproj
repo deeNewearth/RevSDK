@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\revClient\revClient.csproj" />
+    <ProjectReference Include="..\..\revSDK\revClient.csproj" />
   </ItemGroup>
 
   <ItemGroup>
