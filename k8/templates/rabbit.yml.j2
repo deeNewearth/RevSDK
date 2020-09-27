@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: Service
+metadata:
+    name: {{RABBITMQSERVER}}
+spec:
+    ports:
+    -   name: amqp 
+        port: 5672
+        protocol: TCP
+    -   name: management
+        port: 15672
+        protocol: TCP
+    selector:
+        app: {{RABBITMQSERVER}}
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+    name: {{RABBITMQSERVER}}
+spec:
+  serviceName: {{RABBITMQSERVER}}
+  selector:
+    matchLabels:
+        app: {{RABBITMQSERVER}}
+  replicas: 1
+  template:
+    metadata:
+        labels:
+            app: {{RABBITMQSERVER}}
+    spec:
+        containers:
+        -   name: {{RABBITMQSERVER}}
+            image: cloudconnect.scanrev.com:5000/rev-mq:1.0
+            volumeMounts:
+            -   mountPath: "/var/lib/rabbitmq/mnesia/"
+                name: mq-data
+
+            ports:
+            -   containerPort: 6379
+            -   containerPort: 15672
+            env:
+            -   name: RABBITMQ_DEFAULT_USER
+                value: "revRabbit"
+            -   name: RABBITMQ_DEFAULT_PASS
+                valueFrom:
+                    secretKeyRef:
+                        name: rev-secrets
+                        key: rabbitmq_pass
+        {% if not NORESOUCERESERVATION  %}
+            resources:
+                requests:
+                    cpu: "500m"
+                    memory: "1000Mi"
+        {% endif %}
+
+        imagePullSecrets:
+        - name: secret-cloudconnect
+  
+  volumeClaimTemplates:
+  - metadata:
+        name: mq-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi
+
+
+        

@@ -1,0 +1,241 @@
+{% macro revdepends(serviceName) -%}
+        imagePullSecrets:
+        - name: secret-cloudconnect
+
+        initContainers:
+        -   name: init-{{serviceName}}-{{ELASTICSERVER}}
+            image: busybox
+            command: ['sh', '-c', 'until nslookup {{ELASTICSERVER}}-loadbalancer; do echo waiting for es; sleep 2; done;']
+        -   name: init-{{serviceName}}-{{MONGOSERVER}}
+            image: busybox
+            command: ['sh', '-c', 'until nslookup {{MONGOSERVER}}; do echo waiting for es; sleep 2; done;']
+        -   name: init-{{serviceName}}-{{RABBITMQSERVER}}
+            image: busybox
+            command: ['sh', '-c', 'until nslookup {{RABBITMQSERVER}}; do echo waiting for es; sleep 2; done;']
+{%- endmacro %}
+
+{% macro revenv() -%}
+            -   name: elasticsearch__nodes__0
+                value: "http://{{ELASTICSERVER}}-loadbalancer:9200"
+
+            -   name: mongoDb__connectionString
+                value: "mongodb://{{MONGOSERVER}}:27017?connect=direct"
+
+            -   name: authDb__connectionString
+                value: "mongodb://{{MONGOSERVER}}:27017?connect=direct"
+
+            -   name: authDb__database
+                value: "globalAuth"
+
+            -   name: cacheFolder
+                value: "/tmp"
+
+            -   name: rabbitMQ__hostname
+                value: "{{RABBITMQSERVER}}"
+            -   name: rabbitMQ__user
+                value: "revRabbit"
+            -   name: rabbitMQ__exchange
+                value: "revNewMessages"
+            -   name: rabbitMQ__pass
+                valueFrom:
+                    secretKeyRef:
+                        name: rev-secrets
+                        key: rabbitmq_pass
+
+            -   name: s3Storage__StorageRoot
+                value: "scanrev_beta_data"
+            -   name: s3Storage__bucket
+                value: "revstorage"
+            -   name: s3Storage__region
+                value: "{{S3REGION}}"
+
+        {% if environ('USEMINIO') %}
+
+            -   name: s3Storage__endPointHttp
+                value: "true"
+            -   name: s3Storage__customEndpoint
+                value: "http://{{MINIOSERVER}}:9000"
+            -   name: s3Storage__accesskey
+                valueFrom:
+                    secretKeyRef:
+                        name: rev-secrets
+                        key: minio_accesskey
+            -   name: s3Storage__secretkey
+                valueFrom:
+                    secretKeyRef:
+                        name: rev-secrets
+                        key: minio_pass
+
+        {% else %}
+                {% error "NON MINIO NOT IMPLEMENTED" %}
+        {% endif %}
+        
+
+{%- endmacro %}
+
+
+{% macro revservice(revServiceName) -%}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: {{revServiceName}}
+spec:
+  selector:
+    matchLabels:
+        app: {{revServiceName}}
+  replicas: 1
+  template:
+    metadata:
+        labels:
+            app: {{revServiceName}}
+    spec:
+
+        {{revdepends(revServiceName)}}    
+
+        containers:
+        -   name: {{revServiceName}}
+            image: cloudconnect.scanrev.com:5000/{{revServiceName}}:{{REVVER}}
+            resources:
+                requests:
+                    cpu: "500m"
+                    memory: "500Mi"
+            env:
+
+            {{revenv()}}    
+
+{%- endmacro %}            
+
+{{revservice('rev-es-service')}}
+
+---
+
+{{revservice('rev-imageproc')}}
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rev-configmap
+data:
+  userAuth.json: |-
+    {
+        "upAuth": {
+            "users": {
+            "dan": "1111",
+            }
+        }
+    }   
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+    name: rev-frontend
+spec:
+    ports:
+    -   port: 80
+    selector:
+        app: rev-frontend
+
+---
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: rev-frontend
+spec:
+  selector:
+    matchLabels:
+        app: rev-frontend
+  replicas: 1
+  template:
+    metadata:
+        labels:
+            app: rev-frontend
+    spec:
+
+        {{revdepends('rev-frontend')}}
+
+        volumes:
+        -   name: rev-config
+            configMap:
+                name: rev-configmap    
+
+        containers:
+        -   name: rev-frontend
+            image: cloudconnect.scanrev.com:5000/revcore2:{{REVVER}}
+            ports:
+            -   containerPort: 80
+            resources:
+                requests:
+                    cpu: "500m"
+                    memory: "1000Mi"
+            
+            volumeMounts:
+            -   name: rev-config
+                mountPath: "/app/config"
+                readOnly: false
+            
+            env:
+
+            {{revenv()}}    
+
+            -   name: multisite__enabled
+                value: "true"
+            -   name: multisite__custdomainTemplate
+                value: "http://{custom}.scanrev.com"
+            -   name: multisite__currentInstance
+                value: "http://standalone"
+            -   name: multisite__maxWorkspaces
+                value: "1"
+            -   name: multisite__storage
+                value: "s3"
+
+            -   name: authentication__useAuth0
+                value: "false"
+            -   name: redis__Configuration
+                value: "{{REDISERVER}}"
+            -   name: support__siteadmins__0
+                value: "dan"
+
+            -   name: twilio__servicePhoneNumber
+                valueFrom:
+                    secretKeyRef:
+                        name: twilio-creds
+                        key: servicePhoneNumber
+            -   name: twilio__authtoken
+                valueFrom:
+                    secretKeyRef:
+                        name: twilio-creds
+                        key: authtoken
+            -   name: twilio__sid
+                valueFrom:
+                    secretKeyRef:
+                        name: twilio-creds
+                        key: sid
+
+
+        {% if SMTPSERVER == 'mailhog' %}
+            -   name: mailSettings__smtpHost
+                value: "{{SMTPSERVER}}"
+            -   name: mailSettings__smtpPort
+                value: "1025"
+            -   name: mailSettings__defaultMailFromEmail
+                value: "test@test.local"
+            -   name: mailSettings__defaultMailFromName
+                value: "test@test.local"
+
+            -   name: textConfig__smtpServer
+                value: "{{SMTPSERVER}}"
+            -   name: textConfig__smtpPort
+                value: "1025"
+            -   name: textConfig__testPrefix
+                value: "+1900"
+
+        {% else %}
+                {% error "NON MINIO NOT IMPLEMENTED" %}
+        {% endif %}

@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+    name: {{ELASTICSERVER}}-kibana
+spec:
+    ports:
+    -   port: 5601
+        protocol: TCP
+        targetPort: 5601
+    selector:
+        app: {{ELASTICSERVER}}
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: {{ELASTICSERVER}}-kibana
+spec:
+  selector:
+    matchLabels:
+        app: {{ELASTICSERVER}}-kibana
+  replicas: 1
+  template:
+    metadata:
+        labels:
+            app: {{ELASTICSERVER}}-kibana
+    spec:
+        initContainers:
+        -   name: init-kibana-{{ELASTICSERVER}}
+            image: busybox
+            command: ['sh', '-c', 'until nslookup {{ELASTICSERVER}}-loadbalancer; do echo waiting for es; sleep 2; done;']
+        containers:
+        -   name: {{ELASTICSERVER}}-kibana
+            image: docker.elastic.co/kibana/kibana:6.3.2
+            ports:
+            -   containerPort: 5601
+            env:
+            -   name: ELASTICSEARCH_URL
+                value: "http://{{ELASTICSERVER}}-loadbalancer:9200"
+        

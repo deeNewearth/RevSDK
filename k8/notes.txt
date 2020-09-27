@@ -1,0 +1,106 @@
+TO deploy REV 
+run commands in 
+cd C:\codework\rev3.6\k8
+
+ensure custer preparedness
+
+a1) ensure ingress
+kubectl  -n ingress-nginx get svc
+
+if not installed install ingress
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.26.1/deploy/static/mandatory.yaml
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.26.1/deploy/static/provider/cloud-generic.yaml
+
+for single node and dev boxes we might have to restart the machine
+
+b1) ensure default storageclass exists
+kubectl get storageclass
+
+for single node hostpath is good enough
+for clusters we need cloud storage or need to provision longhorn
+
+(check notes in codework\rev3.6\adminScripts\NOTES\my k8 setup)
+
+
+INSTALL PROCEDURE
+
+
+a) ensure secret-cloudconnect exists
+kubectl create secret docker-registry secret-cloudconnect --docker-server=cloudconnect.scanrev.com:5000 --docker-username=rancher --docker-password=XXXXXXXXXXXXXXXXXXX --docker-email=dee@labizbille.com
+
+b) ensure default VOLUME provide exists
+
+d1) Ensure the correct cluster selected
+kubectl config get-contexts
+kubectl config use-context krystalhouse
+
+
+
+c) ensure  rev-secrets exists if not
+docker run --rm -v %cd%/templates:/templates  cloudconnect.scanrev.com:5000/jinja2docker:1.0.2 /templates/secrets.yml.j2 > dist/secrets.yml
+
+kubectl -n revqa apply -f dist/secrets.yml
+
+
+d) To create installable YML
+
+docker run --rm -e REVVER=3.6.1.104 -v %cd%/templates:/templates cloudconnect.scanrev.com:5000/jinja2docker:1.0.2 /templates/site.yml.j2  --format=yaml > dist/site.yml
+
+docker run --rm -e REVVER=3.6.1.104 -e USEMINIO=true   -v %cd%/templates:/templates cloudconnect.scanrev.com:5000/jinja2docker:1.0.3 /templates/site.yml.j2  --format=yaml > dist/site.yml
+
+kubectl -n revqa apply -f dist/site.yml
+
+//for dev environment
+docker run --rm -e REVVER=devbox -e USEMINIO=true   -v %cd%/templates:/templates cloudconnect.scanrev.com:5000/jinja2docker:1.0.3 /templates/site.yml.j2  --format=yaml > dist/site.yml
+kubectl apply -f dist/site.yml
+
+Rev will be available at http://host.docker.internal
+
+
+
+
+DOING THINGHS
+
+to forward a port
+kubectl -n revqa port-forward --address 0.0.0.0 service/minio 8081:9000
+
+kubectl -n revqa port-forward --address 0.0.0.0 service/rev-frontend 8081:80
+
+
+
+
+
+
+
+
+OLD notes
+docker run --rm -v %cd%/templates:/templates -e MONGOSERVER=myMongo dinutac/jinja2docker:2.1.6 /templates/site.yml.j2  --format=yaml > dist/site.yml
+
+//pip3 install jinja2-base64-filters
+docker run --rm -v %cd%/templates:/templates  dinutac/jinja2docker:2.1.6 /templates/secrets.yml.j2 --extension=jinja2_base64_filters.Base64Filters  --extension=cookiecutter.extensions.RandomStringExtension 
+
+
+docker run --rm  -it --entrypoint sh     -v %cd%/templates:/templates  cloudconnect.scanrev.com:5000/jinja2docker:1.0.2
+
+
+To set dev storage 9 IN POWERSJELL)
+kubectl patch storageclass hostpath -p '{\"metadata\": {\"annotations\":{\"storageclass.kubernetes.io/is-default-class\":\"false\"}}}'
+
+kubectl patch storageclass local-storage -p '{\"metadata\": {\"annotations\":{\"storageclass.kubernetes.io/is-default-class\":\"true\"}}}'
+
+for MONGOSERVER
+
+https://medium.com/@dilipkumar/standalone-mongodb-on-kubernetes-cluster-19e7b5896b27
+
+https://kubernetes.io/blog/2017/01/running-mongodb-on-kubernetes-with-statefulsets/
+
+https://www.electronjs.org/apps/kube-forwarder
+
+
+https://stackoverflow.com/questions/59255445/how-can-i-access-nginx-ingress-on-my-local
+
+
+
+

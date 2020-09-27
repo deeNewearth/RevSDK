@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+    name: {{REDISERVER}}
+spec:
+    ports:
+    -   port: 6379
+        protocol: TCP
+        targetPort: 6379
+    selector:
+        app: {{REDISERVER}}
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: {{REDISERVER}}
+spec:
+  selector:
+    matchLabels:
+        app: {{REDISERVER}}
+  replicas: 1
+  template:
+    metadata:
+        labels:
+            app: {{REDISERVER}}
+    spec:
+        containers:
+        -   name: {{REDISERVER}}
+            image: redis:4.0.11
+            ports:
+            -   containerPort: 6379
+        {% if not NORESOUCERESERVATION  %}
+            resources:
+                requests:
+                    cpu: "500m"
+                    memory: "1000Mi"
+        {% endif %}
+        
