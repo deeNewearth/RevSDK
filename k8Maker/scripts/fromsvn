@@ -1,0 +1,22 @@
+#!bin/sh
+
+if [ -d "/templates" ]; then
+  echo "/templates folder already exists. EXITING"
+  exit 1
+fi
+
+
+if [[ -z "${SVN_URL}" ]]; then
+  echo "environment variable SVN_URL is NOT defined. EXITING"
+  exit 1
+else
+  MY_SVN_URL="${SVN_URL}"
+fi
+
+echo "getting from SVN"
+
+svn co --depth infinity $MY_SVN_URL /templates/
+
+BASEDIR=$(dirname $0)
+
+sh ${BASEDIR}/fromexisting $@
