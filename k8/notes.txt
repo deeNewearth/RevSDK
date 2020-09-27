@@ -1,6 +1,4 @@
 TO deploy REV 
-run commands in 
-cd C:\codework\rev3.6\k8
 
 ensure custer preparedness
 
@@ -39,24 +37,40 @@ kubectl config use-context krystalhouse
 
 
 c) ensure  rev-secrets exists if not
-docker run --rm -v %cd%/templates:/templates  cloudconnect.scanrev.com:5000/jinja2docker:1.0.2 /templates/secrets.yml.j2 > dist/secrets.yml
-
+docker run --rm SVN_URL=https://github.com/shreedee/RevSDK/trunk/k8/templates labizbille/makek8 /scripts/fromsvn /templates/secrets.yml.j2 > secrets.yml
 kubectl -n revqa apply -f dist/secrets.yml
 
 
 d) To create installable YML
 
-docker run --rm -e REVVER=3.6.1.104 -v %cd%/templates:/templates cloudconnect.scanrev.com:5000/jinja2docker:1.0.2 /templates/site.yml.j2  --format=yaml > dist/site.yml
+docker run --rm -e REVVER=3.6.1.104 -e SVN_URL=https://github.com/shreedee/RevSDK/trunk/k8/templates labizbille/makek8 /scripts/fromsvn /templates/site.yml.j2  --format=yaml > site.yml
 
-docker run --rm -e REVVER=3.6.1.104 -e USEMINIO=true   -v %cd%/templates:/templates cloudconnect.scanrev.com:5000/jinja2docker:1.0.3 /templates/site.yml.j2  --format=yaml > dist/site.yml
+docker run --rm -e REVVER=3.6.1.104 -e USEMINIO=true   SVN_URL=https://github.com/shreedee/RevSDK/trunk/k8/templates labizbille/makek8 /scripts/fromsvn /templates/site.yml.j2  --format=yaml > dist/site.yml
 
 kubectl -n revqa apply -f dist/site.yml
 
-//for dev environment
-docker run --rm -e REVVER=devbox -e USEMINIO=true   -v %cd%/templates:/templates cloudconnect.scanrev.com:5000/jinja2docker:1.0.3 /templates/site.yml.j2  --format=yaml > dist/site.yml
+
+
+***** FOR DEVELOPMENT ENVIRONMENT*******************
+
+run commands in 
+cd codework\rev3.6\k8Scripts
+
+ENUSRE codework\rev3.6\k8Scripts\dist folder exists
+md dist
+
+c1) ensure  rev-secrets exists if not
+docker run --rm -v %cd%/templates:/templates labizbille/makek8 /scripts/fromexisting /templates/secrets.yml.j2 > dist/secrets.yml
+kubectl -n revqa apply -f dist/secrets.yml
+
+
+
+docker run --rm -e REVVER=devbox -e USEMINIO=true   -v %cd%/templates:/templates labizbille/makek8 /scripts/fromexisting /templates/site.yml.j2  --format=yaml > dist/site.yml
 kubectl apply -f dist/site.yml
 
 Rev will be available at http://host.docker.internal
+
+******************************************************
 
 
 
