@@ -1,5 +1,5 @@
 #!bin/sh
 
-echo "running jinja2"
+echo "running jinja2" > 2
 
 jinja2 --extension=jinja2_base64_filters.Base64Filters --extension=cookiecutter.extensions.RandomStringExtension --extension=jinja2_error.ErrorExtension $@

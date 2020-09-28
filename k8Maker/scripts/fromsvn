@@ -13,9 +13,9 @@ else
   MY_SVN_URL="${SVN_URL}"
 fi
 
-echo "getting from SVN"
+echo "getting from SVN" > 2
 
-svn co --depth infinity $MY_SVN_URL /templates/
+svn co --depth infinity $MY_SVN_URL /templates/ 1>2
 
 BASEDIR=$(dirname $0)
 

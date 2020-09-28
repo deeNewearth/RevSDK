@@ -13,9 +13,10 @@ if "!revversion!"=="" (
 
 echo building labizbille/makek8:1.0.%revversion%
 echo %revversion% > versionNo.txt
-docker build -t labizbille/makek8:1.0.%revversion%  .
+docker build -t labizbille/makek8:latest -t labizbille/makek8:1.0.%revversion%  .
 
 docker push labizbille/makek8:1.0.%revversion%
+docker push labizbille/makek8:latest
 
 echo all done
 pause 
