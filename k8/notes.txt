@@ -1,7 +1,10 @@
 TO deploy REV 
 
-ensure custer preparedness
+ENSURE CORRECT CONTEXT
+kubectl config get-contexts
 
+
+ensure custer preparedness
 a1) ensure ingress
 kubectl  -n ingress-nginx get svc
 
@@ -26,28 +29,26 @@ INSTALL PROCEDURE
 
 
 a) ensure secret-cloudconnect exists
+
+kubectl -n revqa  get secrets
+
+IF not 
+
 kubectl create secret docker-registry secret-cloudconnect --docker-server=cloudconnect.scanrev.com:5000 --docker-username=rancher --docker-password=XXXXXXXXXXXXXXXXXXX --docker-email=dee@labizbille.com
 
-b) ensure default VOLUME provide exists
 
-d1) Ensure the correct cluster selected
-kubectl config get-contexts
-kubectl config use-context krystalhouse
-
-
-
-c) ensure  rev-secrets exists if not
+IF NOT   rev-secrets exists 
 docker run --rm SVN_URL=https://github.com/shreedee/RevSDK/trunk/k8/templates labizbille/makek8 /scripts/fromsvn /templates/secrets.yml.j2 > secrets.yml
-kubectl -n revqa apply -f dist/secrets.yml
+kubectl -n revqa apply -f secrets.yml
 
 
 d) To create installable YML
 
 docker run --rm -e REVVER=3.6.1.104 -e SVN_URL=https://github.com/shreedee/RevSDK/trunk/k8/templates labizbille/makek8 /scripts/fromsvn /templates/site.yml.j2  --format=yaml > site.yml
 
-docker run --rm -e REVVER=3.6.1.104 -e USEMINIO=true   SVN_URL=https://github.com/shreedee/RevSDK/trunk/k8/templates labizbille/makek8 /scripts/fromsvn /templates/site.yml.j2  --format=yaml > dist/site.yml
+docker run --rm -e REVVER=3.6.1.104 -e USEMINIO=true   SVN_URL=https://github.com/shreedee/RevSDK/trunk/k8/templates labizbille/makek8 /scripts/fromsvn /templates/site.yml.j2  --format=yaml > site.yml
 
-kubectl -n revqa apply -f dist/site.yml
+kubectl -n revqa apply -f site.yml
 
 
 

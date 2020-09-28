@@ -71,9 +71,12 @@
 
 {% if REVVER == 'devbox' %}
     #    USING REV in DEV MODE
-{% include 'rev-dev.yml.j2' %}
 {% else %}
 ---
 {% include 'rev.yml.j2' %}
 {% endif %}
+
+
+---
+{% include 'rev-front.yml.j2' %}
 

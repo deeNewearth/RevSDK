@@ -4,13 +4,13 @@
 
         initContainers:
         -   name: init-{{serviceName}}-{{ELASTICSERVER}}
-            image: busybox
+            image: busybox:1.28
             command: ['sh', '-c', 'until nslookup {{ELASTICSERVER}}-loadbalancer; do echo waiting for es; sleep 2; done;']
         -   name: init-{{serviceName}}-{{MONGOSERVER}}
-            image: busybox
+            image: busybox:1.28
             command: ['sh', '-c', 'until nslookup {{MONGOSERVER}}; do echo waiting for es; sleep 2; done;']
         -   name: init-{{serviceName}}-{{RABBITMQSERVER}}
-            image: busybox
+            image: busybox:1.28
             command: ['sh', '-c', 'until nslookup {{RABBITMQSERVER}}; do echo waiting for es; sleep 2; done;']
 {%- endmacro %}
 
@@ -114,34 +114,6 @@ spec:
 
 ---
 
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: rev-configmap
-data:
-  userAuth.json: |-
-    {
-        "upAuth": {
-            "users": {
-            "dan": "1111",
-            }
-        }
-    }   
-
----
-
-apiVersion: v1
-kind: Service
-metadata:
-    name: rev-frontend
-spec:
-    ports:
-    -   port: 80
-    selector:
-        app: rev-frontend
-
----
-
 
 apiVersion: apps/v1
 kind: Deployment
@@ -160,11 +132,6 @@ spec:
 
         {{revdepends('rev-frontend')}}
 
-        volumes:
-        -   name: rev-config
-            configMap:
-                name: rev-configmap    
-
         containers:
         -   name: rev-frontend
             image: cloudconnect.scanrev.com:5000/revcore2:{{REVVER}}
@@ -174,11 +141,6 @@ spec:
                 requests:
                     cpu: "500m"
                     memory: "1000Mi"
-            
-            volumeMounts:
-            -   name: rev-config
-                mountPath: "/app/config"
-                readOnly: false
             
             env:
 
@@ -197,8 +159,22 @@ spec:
 
             -   name: authentication__useAuth0
                 value: "false"
+            -   name: authentication__revConnect
+                value: "http://scan-rev.com"
+
+
+            -   name: projectTemplates
+                value: "http://downloads.labizbille.com/revTemplates/onBoardingRepos.json"
+
+            -   name: support__helpTopics
+                value: "http://s3.amazonaws.com/downloads.labizbille.com/revTemplates/helpTopics.json"
+
+
             -   name: redis__Configuration
                 value: "{{REDISERVER}}"
+            -   name: redis__InstanceName
+                value: "rev"
+
             -   name: support__siteadmins__0
                 value: "dan"
 
