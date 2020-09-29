@@ -178,6 +178,8 @@ spec:
             -   name: support__siteadmins__0
                 value: "dan"
 
+{% if environ('USETWILIO') %}                
+
             -   name: twilio__servicePhoneNumber
                 valueFrom:
                     secretKeyRef:
@@ -193,6 +195,7 @@ spec:
                     secretKeyRef:
                         name: twilio-creds
                         key: sid
+{% endif %}                        
 
 
         {% if SMTPSERVER == 'mailhog' %}

@@ -34,7 +34,7 @@ kubectl -n revqa  get secrets
 
 IF not 
 
-kubectl create secret docker-registry secret-cloudconnect --docker-server=cloudconnect.scanrev.com:5000 --docker-username=rancher --docker-password=XXXXXXXXXXXXXXXXXXX --docker-email=dee@labizbille.com
+kubectl -n revqa create secret docker-registry secret-cloudconnect --docker-server=cloudconnect.scanrev.com:5000 --docker-username=rancher --docker-password=XXXXXXXXXXXXXXXXXXX --docker-email=dee@labizbille.com
 
 
 IF NOT   rev-secrets exists 
