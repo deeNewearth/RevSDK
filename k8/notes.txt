@@ -46,7 +46,7 @@ d) To create installable YML
 
 docker run --rm -e REVVER=3.6.1.104 -e SVN_URL=https://github.com/shreedee/RevSDK/trunk/k8/templates labizbille/makek8 /scripts/fromsvn /templates/site.yml.j2  --format=yaml > site.yml
 
-docker run --rm -e REVVER=3.6.1.104 -e USEMINIO=true -e REVHOST=kspolice.rev.local  -e SVN_URL=https://github.com/shreedee/RevSDK/trunk/k8/templates labizbille/makek8 /scripts/fromsvn /templates/site.yml.j2  --format=yaml > site.yml
+docker run --rm -e REVVER=3.6.1.104 -e USEMINIO=true -e REVHOST=kspolice.rev.local -e DATASIZE=500 -e SVN_URL=https://github.com/shreedee/RevSDK/trunk/k8/templates labizbille/makek8 /scripts/fromsvn /templates/site.yml.j2  --format=yaml > site.yml
 
 kubectl -n revqa apply -f site.yml
 
