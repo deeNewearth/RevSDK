@@ -45,7 +45,7 @@ spec:
           servicePort: 80
 {% endif %}
 
-{% if REVHOST %}
+{% if REVHOST is defined %}
     host: {{REVHOST}}
 {% endif %}    
 
