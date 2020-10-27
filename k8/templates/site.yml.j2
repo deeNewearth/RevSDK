@@ -8,6 +8,14 @@
 
 {% if REVVER == 'devbox' %}
     {%-  set NORESOUCERESERVATION=True  -%}    
+    {%-  set REVHOST='host.docker.internal'  -%}    
+{% else %}
+    {% if environ('REVHOST') %}
+        {%-  set REVHOST=environ('REVHOST')  -%}
+    {% else %}
+        {% error "REVHOST NOT defined add -e REVHOST=REV_FQDN" %}
+    {% endif %}
+
 {% endif %}
 
 
@@ -22,6 +30,14 @@
     {% endif %}
 
 {% endif %}
+
+
+{% if environ('DATASIZE') %}
+    {%-  set DATASIZE=environ('DATASIZE')  -%}
+{% else %}
+    {%-  set DATASIZE='25'  -%}
+{% endif %}
+
 
 {%- set SMTPSERVER='mailhog' -%}
 

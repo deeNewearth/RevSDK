@@ -29,7 +29,8 @@ metadata:
     kubernetes.io/ingress.class: "nginx"
 spec:
   rules:
-  - http:
+  - host: {{REVHOST}}
+    http:
       paths:
       - path: /revstorage/
         backend:
@@ -41,12 +42,7 @@ spec:
 
 {% if REVVER == 'devbox' %}
           servicePort: 56395
-          
-    host: host.docker.internal
-
 {% else %}
-
           servicePort: 80
-
 {% endif %}
 
