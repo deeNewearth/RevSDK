@@ -12,10 +12,6 @@
 {% else %}
     {% if environ('REVHOST') %}
         {%-  set REVHOST=environ('REVHOST')  -%}
-    {% else %}
-        {% error "REVHOST NOT defined add -e REVHOST=REV_FQDN" %}
-    {% endif %}
-
 {% endif %}
 
 

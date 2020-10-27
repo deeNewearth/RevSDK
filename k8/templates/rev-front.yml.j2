@@ -29,8 +29,7 @@ metadata:
     kubernetes.io/ingress.class: "nginx"
 spec:
   rules:
-  - host: {{REVHOST}}
-    http:
+  - http:
       paths:
       - path: /revstorage/
         backend:
@@ -45,4 +44,9 @@ spec:
 {% else %}
           servicePort: 80
 {% endif %}
+
+{% if REVHOST %}
+    host: {{REVHOST}}
+{% endif %}    
+
 
