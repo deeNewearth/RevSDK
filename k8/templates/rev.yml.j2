@@ -114,6 +114,12 @@ spec:
 
 ---
 
+{% if environ('HASOCR') %}
+{{revservice('rev-ocr-service')}}
+---
+{% endif %}
+
+
 
 apiVersion: apps/v1
 kind: Deployment

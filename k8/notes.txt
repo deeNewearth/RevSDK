@@ -50,6 +50,13 @@ docker run --rm -e REVVER=3.6.1.104 -e USEMINIO=true -e REVHOST=kspolice.rev.loc
 
 kubectl -n revqa apply -f site.yml
 
+additional features
+* FOR OCR add  -e HASOCR=true
+
+* FOR MINIO DATASIZE add  -e DATASIZE=XXX    (default is 25, unit is GB)
+
+* for specific host add -e REVHOST=kspolice.rev.local
+
 
 
 ***** FOR DEVELOPMENT ENVIRONMENT*******************
