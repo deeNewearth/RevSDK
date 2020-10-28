@@ -163,6 +163,11 @@ spec:
             -   name: multisite__storage
                 value: "s3"
 
+            -   name: authentication__signingKey
+                valueFrom:
+                    secretKeyRef:
+                        name: rev-secrets
+                        key: authentication_signingKey
             -   name: authentication__useAuth0
                 value: "false"
             -   name: authentication__revConnect
