@@ -44,18 +44,23 @@ kubectl -n revqa apply -f secrets.yml
 
 d) To create installable YML
 
-docker run --rm -e REVVER=3.6.1.104 -e SVN_URL=https://github.com/shreedee/RevSDK/trunk/k8/templates labizbille/makek8 /scripts/fromsvn /templates/site.yml.j2  --format=yaml > site.yml
+docker run --rm -e MYREV.REVVER=3.6.1.104 -e SVN_URL=https://github.com/shreedee/RevSDK/trunk/k8/templates labizbille/makek8 /scripts/fromsvn /templates/site.yml.j2  --format=yaml > site.yml
 
-docker run --rm -e REVVER=3.6.1.104 -e USEMINIO=true -e REVHOST=kspolice.rev.local -e DATASIZE=500 -e SVN_URL=https://github.com/shreedee/RevSDK/trunk/k8/templates labizbille/makek8 /scripts/fromsvn /templates/site.yml.j2  --format=yaml > site.yml
+docker run --rm -e MYREV.REVVER=3.6.1.104 -e USEMINIO=true -e MYREV.REVHOST=kspolice.rev.local -e MYREV.DATASIZE=500 -e SVN_URL=https://github.com/shreedee/RevSDK/trunk/k8/templates labizbille/makek8 /scripts/fromsvn /templates/site.yml.j2  --format=yaml > site.yml
 
 kubectl -n revqa apply -f site.yml
 
 additional features
 * FOR OCR add  -e HASOCR=true
 
-* FOR MINIO DATASIZE add  -e DATASIZE=XXX    (default is 25, unit is GB)
+* FOR MINIO MYREV.DATASIZE add  -e MYREV.DATASIZE=XXX    (default is 25, unit is GB)
 
-* for specific host add -e REVHOST=kspolice.rev.local
+* for specific host add -e MYREV.REVHOST=kspolice.rev.local
+
+* for Google  use -e HASOCR=google
+CREATE the Auth config by renaming the AUTH file to scanrevteam_google_key.json
+
+kubectl create secret generic google-ocr-config --from-file=scanrevteam_google_key.json
 
 
 
@@ -73,12 +78,14 @@ kubectl -n revqa apply -f dist/secrets.yml
 
 
 
-docker run --rm -e REVVER=devbox -e USEMINIO=true   -v %cd%/templates:/templates labizbille/makek8 /scripts/fromexisting /templates/site.yml.j2  --format=yaml > dist/site.yml
+docker run --rm -e MYREV.REVVER=devbox -e USEMINIO=true   -v %cd%/templates:/templates labizbille/makek8 /scripts/fromexisting /templates/site.yml.j2  --format=yaml > dist/site.yml
 kubectl apply -f dist/site.yml
 
 Rev will be available at http://host.docker.internal
 
 ******************************************************
+
+
 
 
 
@@ -98,7 +105,7 @@ kubectl -n revqa port-forward --address 0.0.0.0 service/rev-frontend 8081:80
 
 
 OLD notes
-docker run --rm -v %cd%/templates:/templates -e MONGOSERVER=myMongo dinutac/jinja2docker:2.1.6 /templates/site.yml.j2  --format=yaml > dist/site.yml
+docker run --rm -v %cd%/templates:/templates -e MYREV.MONGOSERVER=myMongo dinutac/jinja2docker:2.1.6 /templates/site.yml.j2  --format=yaml > dist/site.yml
 
 //pip3 install jinja2-base64-filters
 docker run --rm -v %cd%/templates:/templates  dinutac/jinja2docker:2.1.6 /templates/secrets.yml.j2 --extension=jinja2_base64_filters.Base64Filters  --extension=cookiecutter.extensions.RandomStringExtension 
@@ -112,7 +119,7 @@ kubectl patch storageclass hostpath -p '{\"metadata\": {\"annotations\":{\"stora
 
 kubectl patch storageclass local-storage -p '{\"metadata\": {\"annotations\":{\"storageclass.kubernetes.io/is-default-class\":\"true\"}}}'
 
-for MONGOSERVER
+for MYREV.MONGOSERVER
 
 https://medium.com/@dilipkumar/standalone-mongodb-on-kubernetes-cluster-19e7b5896b27
 

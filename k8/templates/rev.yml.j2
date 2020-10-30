@@ -3,76 +3,18 @@
         - name: secret-cloudconnect
 
         initContainers:
-        -   name: init-{{serviceName}}-{{ELASTICSERVER}}
+        -   name: init-{{serviceName}}-{{MYREV.ELASTICSERVER}}
             image: busybox:1.28
-            command: ['sh', '-c', 'until nslookup {{ELASTICSERVER}}-loadbalancer; do echo waiting for es; sleep 2; done;']
-        -   name: init-{{serviceName}}-{{MONGOSERVER}}
+            command: ['sh', '-c', 'until nslookup {{MYREV.ELASTICSERVER}}-loadbalancer; do echo waiting for es; sleep 2; done;']
+        -   name: init-{{serviceName}}-{{MYREV.MONGOSERVER}}
             image: busybox:1.28
-            command: ['sh', '-c', 'until nslookup {{MONGOSERVER}}; do echo waiting for es; sleep 2; done;']
-        -   name: init-{{serviceName}}-{{RABBITMQSERVER}}
+            command: ['sh', '-c', 'until nslookup {{MYREV.MONGOSERVER}}; do echo waiting for es; sleep 2; done;']
+        -   name: init-{{serviceName}}-{{MYREV.RABBITMQSERVER}}
             image: busybox:1.28
-            command: ['sh', '-c', 'until nslookup {{RABBITMQSERVER}}; do echo waiting for es; sleep 2; done;']
+            command: ['sh', '-c', 'until nslookup {{MYREV.RABBITMQSERVER}}; do echo waiting for es; sleep 2; done;']
 {%- endmacro %}
 
-{% macro revenv() -%}
-            -   name: elasticsearch__nodes__0
-                value: "http://{{ELASTICSERVER}}-loadbalancer:9200"
-
-            -   name: mongoDb__connectionString
-                value: "mongodb://{{MONGOSERVER}}:27017?connect=direct"
-
-            -   name: authDb__connectionString
-                value: "mongodb://{{MONGOSERVER}}:27017?connect=direct"
-
-            -   name: authDb__database
-                value: "globalAuth"
-
-            -   name: cacheFolder
-                value: "/tmp"
-
-            -   name: rabbitMQ__hostname
-                value: "{{RABBITMQSERVER}}"
-            -   name: rabbitMQ__user
-                value: "revRabbit"
-            -   name: rabbitMQ__exchange
-                value: "revNewMessages"
-            -   name: rabbitMQ__pass
-                valueFrom:
-                    secretKeyRef:
-                        name: rev-secrets
-                        key: rabbitmq_pass
-
-            -   name: s3Storage__StorageRoot
-                value: "scanrev_beta_data"
-            -   name: s3Storage__bucket
-                value: "revstorage"
-            -   name: s3Storage__region
-                value: "{{S3REGION}}"
-
-        {% if environ('USEMINIO') %}
-
-            -   name: s3Storage__endPointHttp
-                value: "true"
-            -   name: s3Storage__customEndpoint
-                value: "http://{{MINIOSERVER}}:9000"
-            -   name: s3Storage__accesskey
-                valueFrom:
-                    secretKeyRef:
-                        name: rev-secrets
-                        key: minio_accesskey
-            -   name: s3Storage__secretkey
-                valueFrom:
-                    secretKeyRef:
-                        name: rev-secrets
-                        key: minio_pass
-
-        {% else %}
-                {% error "NON MINIO NOT IMPLEMENTED" %}
-        {% endif %}
-        
-
-{%- endmacro %}
-
+{% import  'rev-env.yml.j2' as macros  %}
 
 {% macro revservice(revServiceName) -%}
 
@@ -95,14 +37,14 @@ spec:
 
         containers:
         -   name: {{revServiceName}}
-            image: cloudconnect.scanrev.com:5000/{{revServiceName}}:{{REVVER}}
+            image: cloudconnect.scanrev.com:5000/{{revServiceName}}:{{MYREV.REVVER}}
             resources:
                 requests:
                     cpu: "500m"
                     memory: "500Mi"
             env:
 
-            {{revenv()}}    
+            {{macros.revenv()}}    
 
 {%- endmacro %}            
 
@@ -114,8 +56,9 @@ spec:
 
 ---
 
+
 {% if environ('HASOCR') %}
-{{revservice('rev-ocr-service')}}
+{% include 'rev-ocr.yml.j2' %}
 ---
 {% endif %}
 
@@ -140,7 +83,7 @@ spec:
 
         containers:
         -   name: rev-frontend
-            image: cloudconnect.scanrev.com:5000/revcore2:{{REVVER}}
+            image: cloudconnect.scanrev.com:5000/revcore2:{{MYREV.REVVER}}
             ports:
             -   containerPort: 80
             resources:
@@ -150,7 +93,7 @@ spec:
             
             env:
 
-            {{revenv()}}    
+            {{macros.revenv()}}    
 
             -   name: multisite__enabled
                 value: "true"
@@ -182,7 +125,7 @@ spec:
 
 
             -   name: redis__Configuration
-                value: "{{REDISERVER}}"
+                value: "{{MYREV.REDISERVER}}"
             -   name: redis__InstanceName
                 value: "rev"
 
@@ -209,9 +152,9 @@ spec:
 {% endif %}                        
 
 
-        {% if SMTPSERVER == 'mailhog' %}
+        {% if MYREV.SMTPSERVER == 'mailhog' %}
             -   name: mailSettings__smtpHost
-                value: "{{SMTPSERVER}}"
+                value: "{{MYREV.SMTPSERVER}}"
             -   name: mailSettings__smtpPort
                 value: "1025"
             -   name: mailSettings__defaultMailFromEmail
@@ -219,8 +162,8 @@ spec:
             -   name: mailSettings__defaultMailFromName
                 value: "test@test.local"
 
-            -   name: textConfig__smtpServer
-                value: "{{SMTPSERVER}}"
+            -   name: textConfig__MYREV.SMTPSERVER
+                value: "{{MYREV.SMTPSERVER}}"
             -   name: textConfig__smtpPort
                 value: "1025"
             -   name: textConfig__testPrefix

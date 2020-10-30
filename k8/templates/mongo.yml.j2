@@ -1,35 +1,35 @@
 apiVersion: v1
 kind: Service
 metadata:
-    name: {{MONGOSERVER}}
+    name: {{MYREV.MONGOSERVER}}
     labels:
-        app: {{MONGOSERVER}}
+        app: {{MYREV.MONGOSERVER}}
 spec:
     clusterIP: None
     ports:
     -   port: 27017
     selector:
-        app: {{MONGOSERVER}}
+        app: {{MYREV.MONGOSERVER}}
 
 ---
 
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-    name: {{MONGOSERVER}}-node
+    name: {{MYREV.MONGOSERVER}}-node
 spec:
-  serviceName: {{MONGOSERVER}}
+  serviceName: {{MYREV.MONGOSERVER}}
   selector:
     matchLabels:
-        app: {{MONGOSERVER}}
+        app: {{MYREV.MONGOSERVER}}
   replicas: 1
   template:
     metadata:
         labels:
-            app: {{MONGOSERVER}}
+            app: {{MYREV.MONGOSERVER}}
     spec:
         containers:
-        -   name: {{MONGOSERVER}}-node
+        -   name: {{MYREV.MONGOSERVER}}-node
             image: mongo:3.6
             command: [ "/usr/bin/mongod", "--smallfiles", "--bind_ip_all" ]
             volumeMounts:
@@ -37,7 +37,7 @@ spec:
                 name: mongo-data
             ports:
             -   containerPort: 27017
-        {% if not NORESOUCERESERVATION  %}
+        {% if not MYREV.NORESOUCERESERVATION  %}
             resources:
                 requests:
                     cpu: "500m"

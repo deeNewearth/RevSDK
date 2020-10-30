@@ -4,7 +4,7 @@ metadata:
     name: rev-frontend
 spec:
 
-{% if REVVER == 'devbox' %}
+{% if MYREV.REVVER == 'devbox' %}
 
     type: ExternalName
     externalName: host.docker.internal
@@ -40,14 +40,14 @@ spec:
         backend:
           serviceName: rev-frontend
 
-{% if REVVER == 'devbox' %}
+{% if MYREV.REVVER == 'devbox' %}
           servicePort: 56395
 {% else %}
           servicePort: 80
 {% endif %}
 
-{% if REVHOST is defined %}
-    host: {{REVHOST}}
+{% if MYREV.REVHOST is defined %}
+    host: {{MYREV.REVHOST}}
 {% endif %}    
 
 

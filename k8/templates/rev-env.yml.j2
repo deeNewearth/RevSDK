@@ -1,0 +1,60 @@
+{% import 'definations.yml.j2' as MYREV %}
+
+{% macro revenv() -%}
+            -   name: elasticsearch__nodes__0
+                value: "http://{{MYREV.ELASTICSERVER}}-loadbalancer:9200"
+
+            -   name: mongoDb__connectionString
+                value: "mongodb://{{MYREV.MONGOSERVER}}:27017?connect=direct"
+
+            -   name: authDb__connectionString
+                value: "mongodb://{{MYREV.MONGOSERVER}}:27017?connect=direct"
+
+            -   name: authDb__database
+                value: "globalAuth"
+
+            -   name: cacheFolder
+                value: "/tmp"
+
+            -   name: rabbitMQ__hostname
+                value: "{{MYREV.RABBITMQSERVER}}"
+            -   name: rabbitMQ__user
+                value: "revRabbit"
+            -   name: rabbitMQ__exchange
+                value: "revNewMessages"
+            -   name: rabbitMQ__pass
+                valueFrom:
+                    secretKeyRef:
+                        name: rev-secrets
+                        key: rabbitmq_pass
+
+            -   name: s3Storage__StorageRoot
+                value: "scanrev_beta_data"
+            -   name: s3Storage__bucket
+                value: "revstorage"
+            -   name: s3Storage__region
+                value: "{{MYREV.S3REGION}}"
+
+        {% if environ('USEMINIO') %}
+
+            -   name: s3Storage__endPointHttp
+                value: "true"
+            -   name: s3Storage__customEndpoint
+                value: "http://{{MYREV.MINIOSERVER}}:9000"
+            -   name: s3Storage__accesskey
+                valueFrom:
+                    secretKeyRef:
+                        name: rev-secrets
+                        key: minio_accesskey
+            -   name: s3Storage__secretkey
+                valueFrom:
+                    secretKeyRef:
+                        name: rev-secrets
+                        key: minio_pass
+
+        {% else %}
+                {% error "NON MINIO NOT IMPLEMENTED" %}
+        {% endif %}
+        
+
+{%- endmacro %}

@@ -1,0 +1,61 @@
+{% import  'rev-env.yml.j2' as macros  %}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: rev-ocr-service
+spec:
+  selector:
+    matchLabels:
+        app: rev-ocr-service
+  replicas: 1
+  template:
+    metadata:
+        labels:
+            app: rev-ocr-service
+    spec:
+
+        {{revdepends(revServiceName)}}  
+
+{% if environ('HASOCR') == 'google' %}
+        volumes:
+        -   name: google-ocr-config-volume
+            secret:
+                secretName: google-ocr-config  
+{% endif %}
+
+        containers:
+        -   name: rev-ocr-service
+            image: cloudconnect.scanrev.com:5000/rev-ocr-service:{{MYREV.REVVER}}
+
+{% if environ('HASOCR') == 'google' %}
+            volumeMounts:
+            -   name: google-ocr-config-volume
+                mountPath: /ocrconfig
+{% endif %}
+
+
+            resources:
+                requests:
+                    cpu: "500m"
+                    memory: "500Mi"
+            env:
+
+            {{macros.revenv()}}    
+
+{% if environ('HASOCR') == 'google' %}
+
+            -   name: ocrService__ocrEngine
+                value: "google"
+            -   name: google__storageBucket
+                value: {{MYREV.REVHOST}}
+            -   name: google__projectId
+                value: "scanrevteam"
+            -   name: GOOGLE_APPLICATION_CREDENTIALS
+                value: "/ocrconfig/scanrevteam_google_key.json"
+
+{% else %}                
+
+            -   name: ocrService__ocrEngine
+                value: "tess"
+{% endif %}

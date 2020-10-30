@@ -1,50 +1,4 @@
-
-{% if environ('REVVER') %}
-    {%-  set REVVER=environ('REVVER')  -%}
-{% else %}
-    {% error "revVER not set call with -e REVVER=XXXXXX" %}
-{% endif %}
-
-
-{% if REVVER == 'devbox' %}
-    {%-  set NORESOUCERESERVATION=True  -%}    
-    {%-  set REVHOST='host.docker.internal'  -%}    
-{% else %}
-    {% if environ('REVHOST') %}
-        {%-  set REVHOST=environ('REVHOST')  -%}
-    {% endif %}
-{% endif %}
-
-
-{% if environ('S3REGION') %}
-    {%-  set S3REGION=environ('S3REGION')  -%}
-{% else %}
-
-    {% if environ('USEMINIO') %}
-        {%-  set S3REGION='us-east-1'  -%}
-    {% else %}
-        {% error "S3REGION NOT IMPLEMENTED" %}
-    {% endif %}
-
-{% endif %}
-
-
-{% if environ('DATASIZE') %}
-    {%-  set DATASIZE=environ('DATASIZE')  -%}
-{% else %}
-    {%-  set DATASIZE='25'  -%}
-{% endif %}
-
-
-{%- set SMTPSERVER='mailhog' -%}
-
-
-{%- set MONGOSERVER='mongo' -%}
-{%- set REDISERVER='redis' -%}
-{%- set RABBITMQSERVER='rabbitmq' -%}
-{%- set ELASTICSERVER='elasticsearch' -%}
-
-{%- set MINIOSERVER='minio' -%}
+{% import 'definations.yml.j2' as MYREV %}
 
 {% include 'mongo.yml.j2' %}
 
@@ -73,7 +27,7 @@
 {% endif %}
 
 
-{% if SMTPSERVER == 'mailhog' %}
+{% if MYREV.SMTPSERVER == 'mailhog' %}
 
 ---
 
@@ -82,7 +36,7 @@
 {% endif %}
 
 
-{% if REVVER == 'devbox' %}
+{% if MYREV.REVVER == 'devbox' %}
     #    USING REV in DEV MODE
 {% else %}
 ---
