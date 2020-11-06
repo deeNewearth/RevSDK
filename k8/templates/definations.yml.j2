@@ -9,9 +9,15 @@
     {%-  set NORESOUCERESERVATION=True  -%}    
     {%-  set REVHOST='host.docker.internal'  -%}    
 {% else %}
+
     {% if environ('REVHOST') %}
         {%-  set REVHOST=environ('REVHOST')  -%}
     {% endif %}
+
+    {% if environ('NORESOUCERESERVATION') %}
+        {%-  set NORESOUCERESERVATION=True  -%}  
+    {% endif %}
+
 {% endif %}
 
 

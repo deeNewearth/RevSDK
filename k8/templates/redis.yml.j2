@@ -28,6 +28,7 @@ spec:
     spec:
         containers:
         -   name: {{MYREV.REDISERVER}}
+#            image: eqalpha/keydb:x86_64_v6.0.16
             image: redis:4.0.11
             ports:
             -   containerPort: 6379
