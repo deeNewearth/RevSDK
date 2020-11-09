@@ -67,6 +67,15 @@ CREATE the Auth config by renaming the AUTH file to scanrevteam_google_key.json
 kubectl create secret generic google-ocr-config --from-file=scanrevteam_google_key.json
 
 
+* FOR S3
+don't add USE MiNIO
+instead make sure rev-s3-secrets exists with key accesskey and secretkey
+
+* For Auth0
+-e USEAUTH0=true
+make sure auth0-creds exists with key apiIdentifier and clientSecret
+
+
 
 ***** FOR DEVELOPMENT ENVIRONMENT*******************
 
@@ -78,7 +87,7 @@ md dist
 
 c1) ensure  rev-secrets exists if not
 docker run --rm -v %cd%/templates:/templates labizbille/makek8 /scripts/fromexisting /templates/secrets.yml.j2 > dist/secrets.yml
-kubectl -n revqa apply -f dist/secrets.yml
+kubectl apply -f dist/secrets.yml
 
 
 

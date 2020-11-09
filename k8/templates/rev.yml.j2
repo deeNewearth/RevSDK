@@ -111,10 +111,30 @@ spec:
                     secretKeyRef:
                         name: rev-secrets
                         key: authentication_signingKey
-            -   name: authentication__useAuth0
-                value: "false"
             -   name: authentication__revConnect
                 value: "http://scan-rev.com"
+
+{% if environ('USEAUTH0') %}                
+
+            -   name: Auth0__Domain
+                value: "scanrev.auth0.com"
+            -   name: Auth0__ApiIdentifier
+                valueFrom:
+                    secretKeyRef:
+                        name: auth0-creds
+                        key: apiIdentifier
+            -   name: Auth0__ClientSecret
+                valueFrom:
+                    secretKeyRef:
+                        name: auth0-creds
+                        key: clientSecret
+
+
+{% else %} 
+            -   name: authentication__useAuth0
+                value: "false"
+
+{% endif %} 
 
 
             -   name: projectTemplates

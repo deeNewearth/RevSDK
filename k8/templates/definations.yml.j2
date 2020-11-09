@@ -28,7 +28,7 @@
     {% if environ('USEMINIO') %}
         {%-  set S3REGION='us-east-1'  -%}
     {% else %}
-        {% error "S3REGION NOT IMPLEMENTED" %}
+        {%-  set S3REGION='us-west-2'  -%}
     {% endif %}
 
 {% endif %}
