@@ -71,11 +71,6 @@ kubectl create secret generic google-ocr-config --from-file=scanrevteam_google_k
 don't add USE MiNIO
 instead make sure rev-s3-secrets exists with key accesskey and secretkey
 
-* For Auth0
--e USEAUTH0=true
-make sure auth0-creds exists with key apiIdentifier and clientSecret
-
-
 
 ***** FOR DEVELOPMENT ENVIRONMENT*******************
 
