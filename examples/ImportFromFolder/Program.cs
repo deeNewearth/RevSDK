@@ -28,6 +28,10 @@ namespace ImportFromFolder
         /// </summary>
         public bool removeAfterImport { get; set; }
 
+        /// <summary>
+        /// for rev index fileds that have spaces or special characters, this maps the keyword to the index field
+        /// </summary>
+        public Dictionary<string, string> indexOverride { get; set; }
 
         /// <summary>
         /// dot net group capturing regex
@@ -47,7 +51,7 @@ namespace ImportFromFolder
          * 
         */
 
-        //todo:dev Test with proper regexe with and without repoNames
+        
 
         public static readonly string REPONAME_KEYWORD = @"repoName";
     }
@@ -82,7 +86,7 @@ namespace ImportFromFolder
             configuration.GetSection("config").Bind(_importConfig);
 
 
-            //todo:dev:  WHAT is _importConfig?  why do we do this instead of _importConfig._imageRoot
+            
             if (string.IsNullOrWhiteSpace(_importConfig?.imageRoot))
                 throw new Exception("empty input folder");
 
@@ -153,10 +157,26 @@ namespace ImportFromFolder
                             }
 
                             fields = match.Groups.ToDictionary(k => k.Name, v => v.Value);
+
+                            //Remove the full match group
+                            fields.Remove(key: "0");
+
                             if (fields.ContainsKey(MyConfig.REPONAME_KEYWORD))
                             {
                                 repoName = fields[MyConfig.REPONAME_KEYWORD];
                                 fields.Remove(MyConfig.REPONAME_KEYWORD);
+                            }
+
+                            if (null != _importConfig.indexOverride)
+                            {
+                                foreach (var kv in _importConfig.indexOverride)
+                                {
+                                    if (fields.ContainsKey(kv.Key))
+                                    {
+                                        fields[kv.Value] = fields[kv.Key];
+                                        fields.Remove(kv.Key);
+                                    }
+                                }
                             }
                         }
 

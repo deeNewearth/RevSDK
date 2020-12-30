@@ -1,13 +1,20 @@
 @echo off
-xcopy /Y /F Dockerfile ..\bin\Release\publish
+xcopy /Y /F Dockerfile ..\bin\Release
 set /p revversion=<version.txt
 
-echo building labizbille/importfromfolder:%revversion%
-docker build -t labizbille/importfromfolder:%revversion% -t labizbille/importfromfolder:currentBuild ..\bin\Release\publish
+if "!revversion!"=="" (
+    set /P revversion=1
+) else (
+    set /A revversion=revversion+1
+)
 
-echo creating portbale image %CD%/../bin/importfromfolder_%revversion%.tar
-docker save --output %CD%/../bin/importfromfolder_%revversion%.tar labizbille/importfromfolder:%revversion% 
+echo building baradiyah/importfromfolder:1.0.%revversion%
+docker build -t baradiyah/importfromfolder:1.0.%revversion% ..\bin\Release
 
+echo ready to publish baradiyah/importfromfolder:1.0.%revversion%, Press CTRL-C to exit or any key to continue
+
+pause
+docker push baradiyah/importfromfolder:1.0.%revversion%
 
 echo all done
 pause 
