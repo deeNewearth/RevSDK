@@ -5,8 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.FileExtensions;
-using Microsoft.Extensions.Configuration.Json;
+using Microsoft.Extensions.Logging;
 
 namespace ImportFromFolder
 {
@@ -16,6 +15,12 @@ namespace ImportFromFolder
         /// The root forlder where we start looking for files to import
         /// </summary>
         public string imageRoot { get; set; }
+
+        //todo:dev:
+        /// <summary>
+        /// The folder where we create log files. If this is empty we DONOT write logs to the file
+        /// </summary>
+        public string logFileLocation {get;set;}
 
         /// <summary>
         /// The name of the repository to import into
@@ -68,6 +73,8 @@ namespace ImportFromFolder
 
         readonly IFileGetter _fileGetter;
 
+        readonly ILogger _logger;
+
         public Program()
         {
             var configuration = new ConfigurationBuilder()
@@ -85,8 +92,23 @@ namespace ImportFromFolder
 
             configuration.GetSection("config").Bind(_importConfig);
 
+            //todo:dev:  Ensure this works
+            _logger = LoggerFactory
+                .Create(logging =>
+                {
+                    logging.AddConsole();
 
-            
+                    if (!string.IsNullOrWhiteSpace(_importConfig?.logFileLocation))
+                    {
+                        logging.AddFile(_importConfig?.logFileLocation.TrimEnd('/','\\') + "/logs_importer_{Date}.txt");
+                    }
+                })
+                .CreateLogger<Program>();
+
+
+            _logger.LogInformation("Staring Folder import");
+
+
             if (string.IsNullOrWhiteSpace(_importConfig?.imageRoot))
                 throw new Exception("empty input folder");
 
@@ -130,6 +152,12 @@ namespace ImportFromFolder
                 {
                     if(_doneFilename == fi.FullName)
                     {
+                        continue;
+                    }
+
+                    if(!string.IsNullOrWhiteSpace(_importConfig.logFileLocation) && fi.FullName.StartsWith(_importConfig.logFileLocation))
+                    {
+                        //we donot want to import log files
                         continue;
                     }
 
