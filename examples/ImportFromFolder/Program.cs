@@ -92,7 +92,7 @@ namespace ImportFromFolder
 
             configuration.GetSection("config").Bind(_importConfig);
 
-            //todo:dev:  Ensure this works
+            
             _logger = LoggerFactory
                 .Create(logging =>
                 {
@@ -106,15 +106,20 @@ namespace ImportFromFolder
                 .CreateLogger<Program>();
 
 
-            _logger.LogInformation("Staring Folder import");
+            _logger.LogInformation($"\n\nStarting Folder import at {DateTime.Now}");
 
 
             if (string.IsNullOrWhiteSpace(_importConfig?.imageRoot))
+            {
+                _logger.LogError("empty input folder");
                 throw new Exception("empty input folder");
-
+            }               
             
             if (string.IsNullOrWhiteSpace(_importConfig?.repoName))
+            {
+                _logger.LogError("empty rev reponame");
                 throw new Exception("empty rev reponame");
+            }
 
             _fileGetter = new FileGetter(_importConfig.imageRoot);
 
@@ -181,6 +186,7 @@ namespace ImportFromFolder
                             var match = indexRegex.Match(fi.FullName);
                             if (!match.Success)
                             {
+                                _logger.LogError("regex did not match");
                                 throw new Exception("regex did not match");
                             }
 
@@ -212,11 +218,13 @@ namespace ImportFromFolder
                             fields,
                             new[] { fi }
                             );
+                        //_logger.LogInformation($"Created documnent in {_importConfig.repoName} with page {fi.FullName}");
                     }
                     catch(Exception ex)
                     {
                         Console.Error.WriteLine($"failed to import file {fi.FullName}");
                         Console.Error.Write(ex.ToString());
+                        _logger.LogError(ex.ToString());
 
                         continue;
                     }
@@ -251,13 +259,14 @@ namespace ImportFromFolder
                 await program.ImportDataAsync();
 
                 Console.WriteLine($"All done. {program._donecount} files");
-
+                program._logger.LogInformation($"All done. Added {program._donecount} documents in {program._importConfig.repoName} at {DateTime.Now}");
                 
             }
             catch (Exception ex)
             {
                 Console.Error.WriteLine("Failed With Exception");
                 Console.Error.Write(ex.ToString());
+                
             }
         }
     }
