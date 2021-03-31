@@ -36,7 +36,7 @@ namespace ImportFromFolder
         /// <summary>
         /// for rev index fileds that have spaces or special characters, this maps the keyword to the index field
         /// </summary>
-        public Dictionary<string, string> indexOverride { get; set; }
+        public IList<IndexOverride> indexOverride { get; set; }
 
         /// <summary>
         /// dot net group capturing regex
@@ -60,6 +60,12 @@ namespace ImportFromFolder
 
         public static readonly string REPONAME_KEYWORD = @"repoName";
     }
+    public class IndexOverride
+    {
+        public string key { get; set; }
+        public string value { get; set; }
+
+    }
 
     class Program
     {
@@ -79,10 +85,11 @@ namespace ImportFromFolder
         {
             var configuration = new ConfigurationBuilder()
 
+            .AddJsonFile("appsettings.json", true, false)
+            .AddJsonFile("importFolderSettings.json", false, true)
+
 #if DEBUG
-              .AddJsonFile("appsettings.development.json", true, true)
-#else
-              .AddJsonFile("appsettings.json", true, true)
+              .AddJsonFile("appsettings.development.json", false, true)
 #endif
               .AddEnvironmentVariables()
               .Build();
@@ -205,12 +212,13 @@ namespace ImportFromFolder
                             {
                                 foreach (var kv in _importConfig.indexOverride)
                                 {
-                                    if (fields.ContainsKey(kv.Key))
+                                    if (fields.ContainsKey(kv.key))
                                     {
-                                        fields[kv.Value] = fields[kv.Key];
-                                        fields.Remove(kv.Key);
+                                        fields[kv.value] = fields[kv.key];
+                                        fields.Remove(kv.key);
                                     }
                                 }
+                                
                             }
                         }
 
