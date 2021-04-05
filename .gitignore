@@ -1,0 +1,9 @@
+/.vs/revCore/DesignTimeBuild/.dtbcache
+/.vs/revCore/v15/.suo
+/.vs/revCore/v16/.suo
+/examples/ImportFromFolder/ImportFromFolder.csproj.user
+bin
+/examples/ImportFromFolder/obj
+/examples/ImportFromFolder/bin
+/examples/ImportFromFolder/Properties/PublishProfiles/*.user
+obj
