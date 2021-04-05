@@ -1,0 +1,32 @@
+docker run -it --rm -e KUBECONFIG=/kubeconfig -v C:\tools\k8\config-harm-revqa:/kubeconfig --entrypoint=sh robsonpeixoto/kubectl-port-forward@sha256:9bb28c326632582366b464a1147f9b1f1b9824185f8fd60edd318dc11e5ca4de
+
+
+docker run -it --rm -e KUBECONFIG=/kubeconfig -v C:\tmp\tdata\do-config:/kubeconfig --entrypoint=sh robsonpeixoto/kubectl-port-forward@sha256:9bb28c326632582366b464a1147f9b1f1b9824185f8fd60edd318dc11e5ca4de
+
+docker run -it --rm -e KUBECONFIG=/kubeconfig -v C:\tmp\tdata\do-sfo-cluster-1-kubeconfig.yaml:/kubeconfig --entrypoint=sh robsonpeixoto/kubectl-port-forward@sha256:9bb28c326632582366b464a1147f9b1f1b9824185f8fd60edd318dc11e5ca4de
+
+sha256:9bb28c326632582366b464a1147f9b1f1b9824185f8fd60edd318dc11e5ca4de
+
+
+kubectl config set-context krystalhouse --namespace=revqa
+
+kubectl get pods -l app=mongo
+
+db.workspaces.updateOne({name:"revqa"},{$unset:{metaData:1}})
+
+db.workspaces.updateOne({name:"revqa"},{$set:{"metaData.offlineProcess":"true"}});
+
+
+docker run -it --rm -v C:\tmp\tdata:/data --entrypoint=bash digitalocean/doctl:latest
+
+./doctl auth init --context dee_devbox_token
+
+./doctl auth list
+./doctl auth switch --context dee_devbox_token
+
+
+./doctl account get
+
+cd /data
+
+/app/doctl kubernetes cluster kubeconfig save do-sfo-cluster-1

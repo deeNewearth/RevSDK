@@ -1,0 +1,14 @@
+version: "2.0"
+
+services:
+    backend:
+      command:
+        - "app=mongo"
+        - "27019:27017"
+      image: robsonpeixoto/kubectl-port-forward@sha256:9bb28c326632582366b464a1147f9b1f1b9824185f8fd60edd318dc11e5ca4de
+      environment:
+        - KUBECONFIG=/kubeconfig
+      volumes:
+        - C:\tools\k8\config-harm-revqa:/kubeconfig
+      ports:
+        - "27019:27019"
