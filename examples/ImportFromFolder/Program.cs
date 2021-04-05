@@ -196,8 +196,8 @@ namespace ImportFromFolder
                                 _logger.LogError("regex did not match");
                                 throw new Exception("regex did not match");
                             }
-
-                            fields = match.Groups.ToDictionary(k => k.Name, v => v.Value);
+                            
+                            fields = match.Groups.Values.ToDictionary(k => k.Name, v => v.Value);
 
                             //Remove the full match group
                             fields.Remove(key: "0");

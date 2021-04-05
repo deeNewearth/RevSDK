@@ -3,7 +3,7 @@ version: '2.3'
 services:
 
   app: 
-    image: baradiyah/importfromfolder:1.0.0.5
+    image: baradiyah/importfromfolder:1.0.0.7
     restart: on-failure
     volumes:
       - C:\tmp\sampleimages:/images
