@@ -14,7 +14,7 @@ kubectl get pods -l app=mongo
 
 db.workspaces.updateOne({name:"revqa"},{$unset:{metaData:1}})
 
-db.workspaces.updateOne({name:"revqa"},{$set:{"metaData.offlineProcess":"true"}});
+db.workspaces.updateOne({name:"malarkcompanies"},{$set:{"metaData.offlineProcess":"true"}});
 
 
 docker run -it --rm -v C:\tmp\tdata:/data --entrypoint=bash digitalocean/doctl:latest
