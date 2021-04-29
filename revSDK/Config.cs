@@ -10,5 +10,12 @@ namespace revCore
         public string workspace  { get; set;}
         public string jwt { get; set; }
 
+        /// <summary>
+        /// image upload timeOut in seconds
+        /// </summary>
+        public int? timeOut { get; set; }
+
+
+
     }
 }

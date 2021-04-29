@@ -362,6 +362,7 @@ namespace revCore
             {
                 HttpWebRequest httpRequest = WebRequest.Create(upUrl) as HttpWebRequest;
                 httpRequest.Method = "PUT";
+                httpRequest.Timeout = (_config?.timeOut ?? 100) * 1000;
 
                 using (Stream dataStream = httpRequest.GetRequestStream())
                 {
