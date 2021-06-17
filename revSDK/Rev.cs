@@ -38,7 +38,7 @@ namespace revCore
         {
             _config = config;
 
-            if (string.IsNullOrWhiteSpace(_config.jwt))
+            if (string.IsNullOrWhiteSpace(_config?.jwt))
                 throw new Exception("invalid config.JWT");
 
             if (string.IsNullOrWhiteSpace(_config.workspace))
