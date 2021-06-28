@@ -32,6 +32,7 @@ namespace revCore
 
     public class RevDoc
     {
+        public string pvnDocId { get; set; }
         public string id { get; set; }
         public Dictionary<string, string> indexes { get; set; }
 
